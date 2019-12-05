@@ -8,7 +8,10 @@ impl Vector {
     pub fn new(a: Point, b: Point) -> Vector {
         Vector(b.sub(&a))
     }
-    pub fn new_xy(x: f64, y: f64) -> Vector {
+    pub fn from_pt(pt: Point) -> Vector {
+        Vector(pt)
+    }
+    pub fn from_xy(x: f64, y: f64) -> Vector {
         Vector(Point::new(x, y))
     }
 }
@@ -69,6 +72,42 @@ impl Vect {
             s.as_right();
         }
         s
+    }
+
+    ///Computes the Synchronized Euclidean Distance - Vector
+    fn sed_vector(&self, pnt: Point, t: f64) -> Vect {
+        let m = (self.magnitude() / self.dt()) * (t - self.at);
+        //var vb = v.extend_vect(m, 0.0, false)
+        let c_pt = self.v.0.extend(m, 0., false);
+        let a = self.a.add(&c_pt);
+        return Vect::new(a, pnt);
+    }
+
+    ///Extends vector from the from end or from begin of vector
+    fn extend_vect(&self, magnitude: f64, angle: f64, from_end: bool) -> Vect {
+        let c_pt = self.v.0.extend(magnitude, angle, from_end);
+        let cv = Vector::from_pt(c_pt);
+        let a = if from_end { self.b } else { self.a };
+        Vect { a, b: a.add(&cv.0), v: cv, at: 0., bt: 0. }
+    }
+
+    ///Computes vector deflection given deflection angle and
+    /// side of vector to deflect from (from_end)
+    fn deflect_vector(&self, magnitude: f64, defl_angle: f64, from_end: bool) -> Vect {
+        let c_pt = self.v.0.deflect(magnitude, defl_angle, from_end);
+        let cv = Vector::from_pt(c_pt);
+        let a = if from_end { self.b } else { self.a };
+        Vect { a, b: a.add(&cv.0), v: cv, at: 0., bt: 0. }
+    }
+
+    ///Computes distance from A point to Vect
+    fn distance_to_point(&self, pnt: &Point) -> f64 {
+        geom_2d::segment::distance_to_point(&self.a, &self.b, pnt)
+    }
+
+    ///Project vector u on V
+    fn project(&self, onv: &Vect) -> f64 {
+        self.v.0.project(onv.v.0)
     }
 }
 
