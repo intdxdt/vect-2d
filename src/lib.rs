@@ -1,4 +1,6 @@
 use geom_2d::{Point, Coordinate};
+use side_rel::Side;
+use math_util::Feq;
 
 struct Vector(Point);
 
@@ -56,17 +58,18 @@ impl Vect {
     }
 
 
-//SideOfPt computes the relation of A point to A vector
-//fn SideOf(&self, pnt :Point) -> Side {
-//	var ccw = pnt.Orientation2D(&v.A, &v.B)
-//	var s = side.NewSide().AsLeft()
-//	if math.FloatEqual(ccw, 0) {
-//		s.AsOn()
-//	} else if ccw > 0 {
-//		s.AsRight()
-//	}
-//	return s
-//}
+    ///Computes the relation of a point to vector
+    fn side_of(&self, pnt: Point) -> Side {
+        let ccw = pnt.orientation2d(&self.a, &self.b);
+        let mut s = Side::new();
+        s.as_left();
+        if ccw.feq(0.) {
+            s.as_on();
+        } else if ccw > 0. {
+            s.as_right();
+        }
+        s
+    }
 }
 
 #[cfg(test)]

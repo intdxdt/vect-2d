@@ -5,4 +5,6 @@ authors = ["Titus Tienaah <titus.intdxdt@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+math-util = { git = "https://github.com/intdxdt/math-util", branch="master"}
 geom-2d = { git = "https://github.com/intdxdt/geom-2d", branch="master"}
+side-rel = { git = "https://github.com/intdxdt/side-rel", branch="master"}
