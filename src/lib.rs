@@ -2,7 +2,7 @@ use geom_2d::{Point, Coordinate};
 use side_rel::Side;
 use math_util::Feq;
 
-struct Vector(Point);
+pub struct Vector(Point);
 
 impl Vector {
     pub fn new(a: Point, b: Point) -> Vector {
@@ -16,7 +16,7 @@ impl Vector {
     }
 }
 
-struct Vect {
+pub struct Vect {
     pub a: Point,
     pub b: Point,
     pub v: Vector,
@@ -35,12 +35,12 @@ impl Vect {
     }
 
     ///Magnitude of Vector
-    fn magnitude(&self) -> f64 {
+    pub fn magnitude(&self) -> f64 {
         return self.v.0.magnitude();
     }
 
     ///Computes the Direction of Vector
-    fn direction(&self) -> f64 {
+    pub fn direction(&self) -> f64 {
         return self.v.0.direction();
     }
 
@@ -49,20 +49,18 @@ impl Vect {
         return geom_2d::reverse_direction(self.v.0.direction());
     }
 
-
     ///Computes the deflection angle from vector V to u
-    fn deflection_angle(&self, u: &Vect) -> f64 {
+    pub fn deflection_angle(&self, u: &Vect) -> f64 {
         return geom_2d::deflection_angle(self.direction(), u.direction());
     }
 
     ///computes the change in time between bt and at
-    fn dt(&self) -> f64 {
+    pub fn dt(&self) -> f64 {
         return (self.bt - self.at).abs();
     }
 
-
     ///Computes the relation of a point to vector
-    fn side_of(&self, pnt: Point) -> Side {
+    pub fn side_of(&self, pnt: Point) -> Side {
         let ccw = pnt.orientation2d(&self.a, &self.b);
         let mut s = Side::new();
         s.as_left();
@@ -75,7 +73,7 @@ impl Vect {
     }
 
     ///Computes the Synchronized Euclidean Distance - Vector
-    fn sed_vector(&self, pnt: Point, t: f64) -> Vect {
+    pub fn sed_vector(&self, pnt: Point, t: f64) -> Vect {
         let m = (self.magnitude() / self.dt()) * (t - self.at);
         //var vb = v.extend_vect(m, 0.0, false)
         let c_pt = self.v.0.extend(m, 0., false);
@@ -84,7 +82,7 @@ impl Vect {
     }
 
     ///Extends vector from the from end or from begin of vector
-    fn extend_vect(&self, magnitude: f64, angle: f64, from_end: bool) -> Vect {
+    pub fn extend_vect(&self, magnitude: f64, angle: f64, from_end: bool) -> Vect {
         let c_pt = self.v.0.extend(magnitude, angle, from_end);
         let cv = Vector::from_pt(c_pt);
         let a = if from_end { self.b } else { self.a };
@@ -93,7 +91,7 @@ impl Vect {
 
     ///Computes vector deflection given deflection angle and
     /// side of vector to deflect from (from_end)
-    fn deflect_vector(&self, magnitude: f64, defl_angle: f64, from_end: bool) -> Vect {
+    pub fn deflect_vector(&self, magnitude: f64, defl_angle: f64, from_end: bool) -> Vect {
         let c_pt = self.v.0.deflect(magnitude, defl_angle, from_end);
         let cv = Vector::from_pt(c_pt);
         let a = if from_end { self.b } else { self.a };
@@ -101,12 +99,12 @@ impl Vect {
     }
 
     ///Computes distance from A point to Vect
-    fn distance_to_point(&self, pnt: &Point) -> f64 {
+    pub fn distance_to_point(&self, pnt: &Point) -> f64 {
         geom_2d::segment::distance_to_point(&self.a, &self.b, pnt)
     }
 
     ///Project vector u on V
-    fn project(&self, onv: &Vect) -> f64 {
+    pub fn project(&self, onv: &Vect) -> f64 {
         self.v.0.project(onv.v.0)
     }
 }
