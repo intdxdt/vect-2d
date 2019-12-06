@@ -1,7 +1,9 @@
 use geom_2d::{Point, Coordinate};
 use side_rel::Side;
 use math_util::Feq;
+use std::cmp::Ordering;
 
+#[derive(Copy, Clone, Debug)]
 pub struct Vector(Point);
 
 impl Vector {
@@ -13,6 +15,20 @@ impl Vector {
     }
     pub fn from_xy(x: f64, y: f64) -> Vector {
         Vector(Point::new(x, y))
+    }
+}
+
+impl Eq for Vector {}
+
+impl PartialEq for Vector {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.equals(&other.0)
+    }
+}
+
+impl PartialOrd for Vector {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.0.partial_cmp(&other.0)
     }
 }
 
@@ -111,8 +127,24 @@ impl Vect {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use geom_2d::Point;
+    use crate::Vect;
+
+    const prec: i32 = 8;
+
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn it_zero_vector() {
+        let A = Point::new(0.88682, -1.06102);
+        let B = Point::new(3.5, 1.0);
+        let C = Point::new(-3.0, 1.0);
+        let v = Vect::new(Point::new_origin(), Point::new_origin());
+        assert_eq!(v.a, Point::new(0., 0.));
+        assert_eq!(v.b, Point::new(0., 0.));
+        assert_eq!(v.v, Vector(Point::new(0., 0.)));
+        let mdatbt = [v.magnitude(), v.direction(), v.at, v.bt];
+        for o in mdatbt.iter() {
+            assert_eq!(*o, 0.0);
+        }
     }
 }
