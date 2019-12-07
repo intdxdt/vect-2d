@@ -16,6 +16,67 @@ impl Vector {
     pub fn from_xy(x: f64, y: f64) -> Vector {
         Vector(Point::new(x, y))
     }
+
+    ///Add creates A new point by adding to other point
+    fn add(&self, o: Vector) -> Vector {
+        Vector(self.0.add(&o.0))
+    }
+
+    ///Add creates A new point by adding to other point
+    fn sub(&self, o: Vector) -> Vector {
+        Vector(self.0.sub(&o.0))
+    }
+
+    ///Creates a new point by multiplying point by A scaler  k
+    fn kproduct(&self, k: f64) -> Vector {
+        Vector(self.0.kproduct(k))
+    }
+
+    ///Negate vector
+    fn neg(&self) -> Vector {
+        return self.kproduct(-1.0);
+    }
+
+    ///Computes vector magnitude of pt as vector: x , y as components
+    fn magnitude(&self) -> f64 {
+        self.0.magnitude()
+    }
+
+    ///Computes the square vector magnitude of pt as vector: x , y as components
+    ///This has A potential overflow problem based on coordinates of pt x^2 + y^2
+    fn square_magnitude(&self) -> f64 {
+        self.0.square_magnitude()
+    }
+
+    ///Dot Product of two points as vectors
+    fn dot_product(&self, o: Vector) -> f64 {
+        self.0.dot_product(&o.0)
+    }
+
+    ///Unit vector of point
+    fn unit_vector(&self) -> Vector {
+        Vector(self.0.unit_vector())
+    }
+
+    ///project vector u on V
+    fn project(&self, v: Vector) -> f64 {
+        self.0.project(v.0)
+    }
+
+    ///Dir computes direction in radians - counter clockwise from x-axis.
+    fn direction(&self) -> f64 {
+        self.0.direction()
+    }
+
+    ///Reversed direction of vector direction
+    fn reverse_direction(&self) -> f64 {
+        geom_2d::reverse_direction(self.0.direction())
+    }
+
+    ///Computes the deflection angle from vector V to u
+    fn deflection_angle(&self, u: Vector) -> f64 {
+        geom_2d::deflection_angle(self.0.direction(), u.0.direction())
+    }
 }
 
 impl Eq for Vector {}
@@ -50,12 +111,12 @@ impl Vect {
         Vect { a, b, v: Vector::new(a, b), at, bt }
     }
 
-    ///Magnitude of Vector
+    ///magnitude of Vector
     pub fn magnitude(&self) -> f64 {
         return self.v.0.magnitude();
     }
 
-    ///Computes the Direction of Vector
+    ///Computes the direction of Vector
     pub fn direction(&self) -> f64 {
         return self.v.0.direction();
     }
@@ -119,7 +180,7 @@ impl Vect {
         geom_2d::segment::distance_to_point(&self.a, &self.b, pnt)
     }
 
-    ///Project vector u on V
+    ///project vector u on V
     pub fn project(&self, onv: &Vect) -> f64 {
         self.v.0.project(onv.v.0)
     }
@@ -128,13 +189,14 @@ impl Vect {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use geom_2d::Point;
+    use geom_2d::{Point, Geometry, Points, pt};
     use crate::Vect;
+    use math_util::{round, PI};
 
     const prec: i32 = 8;
 
     #[test]
-    fn it_zero_vector() {
+    fn test_zero_vector() {
         let A = Point::new(0.88682, -1.06102);
         let B = Point::new(3.5, 1.0);
         let C = Point::new(-3.0, 1.0);
@@ -146,5 +208,123 @@ mod tests {
         for o in mdatbt.iter() {
             assert_eq!(*o, 0.0);
         }
+    }
+
+
+    #[test]
+    fn test_vector_component() {
+        let v = Vect::new(Point::new_origin(), Point::new(3., 4.));
+        assert_eq!(v.a, Point::new_origin());
+        assert_eq!(v.b, Point::new(3., 4.));
+        assert_eq!(v.v, Vector(Point::new(3., 4.)));
+        assert_eq!(v.magnitude(), 5.0);
+    }
+
+    #[test]
+    fn test_vector_negation() {
+        let A = Point::new(0.88682, -1.06102);
+        let B = Point::new(3.5, 1.0);
+        let C = Point::new(-3.0, 1.0);
+
+        let a = [10., 150., 6.5];
+        let e = [280., 280., 12.8];
+        let v = Vect::new(a[0..2].into(), e[0..2].into());
+        let pv = v.v;
+        let nv = v.v.neg();
+        let mut negA = Point::new(-A.x, -A.y);
+        assert_eq!(nv, pv.kproduct(-1.0));
+        assert_eq!(A.neg(), negA);
+    }
+
+    #[test]
+    fn test_vect_construct() {
+        let a = [10., 150., 6.5];
+        let e = [280., 280., 12.8];
+        let i = [185., 155., 8.6];
+        let v = Vect::new_with_t(a[..2].into(), e[..2].into(), a[2], e[2]);
+        let vo = Vect::new_with_t(a[..2].into(), e[..2].into(), a[2], e[2]);
+        let vi = Vect::new_with_t(i[..2].into(), e[..2].into(), i[2], e[2]);
+        let m = 5.0;
+        let dir = 53.13010235415598f64.to_radians();
+        let c_pt = Point::component(m, dir);
+        let vk = Vect::new(Point::new_origin(), c_pt);
+
+        assert_eq!(vk.a, Point::new_origin());
+        assert_eq!(round(vk.b.x, 8), 3.0);
+        assert_eq!(round(vk.b.y, 8), 4.0);
+
+        assert_eq!(v.a, vo.a);
+        assert_eq!(v.a, vo.a);
+        assert_eq!(v.b, vo.b);
+        assert_eq!(v.b, vo.b);
+
+        assert_eq!(v.magnitude(), vo.magnitude());
+        assert_eq!(v.magnitude(), vo.magnitude());
+        assert_eq!(v.direction(), vo.direction());
+        assert_eq!(v.direction(), vo.direction());
+
+        assert_eq!(v.a.as_array(), a[0..2]);
+        assert_eq!(v.b.as_array(), e[0..2]);
+        assert_eq!(vi.a.as_array(), [i[0], i[1]]);
+        assert_eq!(vi.b, v.b);
+
+        assert_eq!(v.at, a[2]);
+        assert_eq!(v.bt, e[2]);
+        assert_eq!(v.dt(), e[2] - a[2]);
+
+        let aa = Point::new(a[0], a[1]);
+        let ee = Point::new(e[0], e[1]);
+        let d = ee.distance(&aa);
+        assert_eq!(v.magnitude(), d);
+    }
+
+    #[test]
+    fn test_direction() {
+        let v = Vect::new(Point::new_origin(), Point::new(-1., 0.));
+        assert_eq!(v.direction(), PI);
+        assert_eq!(Vector([1., 1.].into()).direction(), 0.7853981633974483f64);
+        assert_eq!(Vector([1., 1.].into()).direction(), std::f64::consts::FRAC_PI_4);
+        assert_eq!(Vector([-1., 0.].into()).direction(), PI);
+        assert_eq!(Vector([1., 3f64.sqrt()].into()).direction(), 60f64.to_radians());
+        assert_eq!(Vector([0, -1].into()).direction(), 270f64.to_radians())
+    }
+
+    #[test]
+    fn test_rev_direction() {
+        let v = Vect::new(Point::new_origin(), Point::new(-1., 0.));
+        assert_eq!(v.direction(), PI);
+        assert_eq!(v.reverse_direction(), 0.0)
+    }
+
+    #[test]
+    fn test_deflection_angle() {
+        let ln0 = [pt![0, 0], pt![20, 30]];
+        let ln1 = [pt![20, 30], pt![40, 15]];
+        let v0 = Vect::new(ln0[0], ln0[1]);
+        let v1 = Vect::new(ln1[0], ln1[1]);
+
+        assert_eq!(
+            round(v0.deflection_angle(&v1), 10),
+            round(93.17983011986422f64.to_radians(), 10)
+        );
+        assert_eq!(round(v0.deflection_angle(&v0), 10), 0f64.to_radians());
+
+        let ln1 = [pt![20, 30], pt![20, 60]];
+        let v1 = Vect::new(ln1[0], ln1[1]);
+
+        assert_eq!(
+            round(v0.deflection_angle(&v1), 10),
+            round(-33.690067525979806f64.to_radians(), 10)
+        );
+    }
+
+    #[test]
+    fn test_projection() {
+        let A = Point::new(0.88682, -1.06102);
+        let B = Point::new(3.5, 1.0);
+        let C = Point::new(-3.0, 1.0);
+        let u = Vect::new(Point::new(0., 0.), A);
+        let v = Vect::new(Point::new(0., 0.), B);
+        assert_eq!(round(u.project(&v), 5), 0.56121);
     }
 }
