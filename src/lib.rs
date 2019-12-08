@@ -222,18 +222,18 @@ mod tests {
 
     #[test]
     fn test_vector_negation() {
-        let A = Point::new(0.88682, -1.06102);
-        let B = Point::new(3.5, 1.0);
-        let C = Point::new(-3.0, 1.0);
+        let a_pt = Point::new(0.88682, -1.06102);
+        let b_pt = Point::new(3.5, 1.0);
+        let c_pt = Point::new(-3.0, 1.0);
 
         let a = [10., 150., 6.5];
         let e = [280., 280., 12.8];
         let v = Vect::new(a[0..2].into(), e[0..2].into());
         let pv = v.v;
         let nv = v.v.neg();
-        let mut negA = Point::new(-A.x, -A.y);
+        let mut negA = Point::new(-a_pt.x, -a_pt.y);
         assert_eq!(nv, pv.kproduct(-1.0));
-        assert_eq!(A.neg(), negA);
+        assert_eq!(a_pt.neg(), negA);
     }
 
     #[test]
@@ -282,7 +282,6 @@ mod tests {
     fn test_direction() {
         let v = Vect::new(Point::new_origin(), Point::new(-1., 0.));
         assert_eq!(v.direction(), PI);
-        assert_eq!(Vector([1., 1.].into()).direction(), 0.7853981633974483f64);
         assert_eq!(Vector([1., 1.].into()).direction(), std::f64::consts::FRAC_PI_4);
         assert_eq!(Vector([-1., 0.].into()).direction(), PI);
         assert_eq!(Vector([1., 3f64.sqrt()].into()).direction(), 60f64.to_radians());
@@ -320,11 +319,65 @@ mod tests {
 
     #[test]
     fn test_projection() {
-        let A = Point::new(0.88682, -1.06102);
-        let B = Point::new(3.5, 1.0);
-        let C = Point::new(-3.0, 1.0);
-        let u = Vect::new(Point::new(0., 0.), A);
-        let v = Vect::new(Point::new(0., 0.), B);
+        let a_pt = Point::new(0.88682, -1.06102);
+        let b_pt = Point::new(3.5, 1.0);
+        let c_pt = Point::new(-3.0, 1.0);
+        let u = Vect::new(Point::new(0., 0.), a_pt);
+        let v = Vect::new(Point::new(0., 0.), b_pt);
         assert_eq!(round(u.project(&v), 5), 0.56121);
+    }
+
+    #[test]
+    fn test_vect() {
+        let A2 = pt![0.88682, -1.06102];
+        let B2 = pt![3.5, 1];
+        let C2 = pt![-3, 1];
+        let D2 = pt![-1.5, -3];
+
+        let m = 25.0;
+        let dir = (165.0f64).to_radians();
+        let cpt = Point::component(m, dir);
+        let va = Vect::new(Point::new(0., 0.), cpt);
+        let va_b = pt![-24.148145657226706, 6.470476127563026];
+
+        //should test distance vector
+        let a = pt![16.82295, 10.44635];
+        let b = pt![28.99656, 15.76452];
+        let on_ab = pt![25.32, 14.16];
+
+        let tpoints = vec![
+            pt![30., 0.], pt![15.78786, 25.26468], pt![-2.61504, -3.09018], pt![28.85125, 27.81773],
+            a, b, on_ab,
+        ];
+
+        let t_dists = vec![14.85, 13.99, 23.69, 12.05, 0.00, 0.00, 0.00];
+        let tvect = Vect::new(a, b);
+        let mut dists = vec![0f64; tpoints.len()];
+        for i in 0..tpoints.len() {
+            let tp = tpoints[i];
+            dists[i] = tvect.distance_to_point(&tp);
+        }
+
+        for i in 0..tpoints.len() {
+            assert_eq!(round(dists[i], 2), round(t_dists[i], 2))
+        }
+    }
+
+    #[test]
+    fn test_sed_vect() {
+        //should test side sed vector to point at time T
+        let a = [10., 150., 6.5];
+        let e = [280., 280., 12.8];
+        let i = [185., 155., 8.6];
+        let ai: Point = [i[0], i[1]].into();
+        let v = Vect::new_with_t(
+            a[..2].into(), e[..2].into(), a[2], e[2],
+        );
+
+        let sed_v = v.sed_vector(ai, i[2]);
+        let sed_v2 = v.sed_vector(ai, i[2]);
+
+        assert_eq!(round(sed_v.magnitude(), prec), 93.24400487);
+        assert_eq!(round(sed_v2.magnitude(), prec), 93.24400487);
     }
 }
