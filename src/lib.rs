@@ -380,4 +380,74 @@ mod tests {
         assert_eq!(round(sed_v.magnitude(), prec), 93.24400487);
         assert_eq!(round(sed_v2.magnitude(), prec), 93.24400487);
     }
+
+    #[test]
+    fn test_ext_vect() {
+        let A = Point::new(0.88682, -1.06102);
+        let B = Point::new(3.5, 1.0);
+        let C = Point::new(-3.0, 1.0);
+
+        let A2 = pt![0.88682, -1.06102];
+        let B2 = pt![3.5, 1];
+        let C2 = pt![-3, 1];
+        let D2 = pt![-1.5, -3];
+
+        let va = Vect::new(Point::new_origin(), A2);
+        let vb = Vect::new(Point::new_origin(), B2);
+        let vc = Vect::new(Point::new_origin(), C2);
+        let vd = Vect::new(Point::new_origin(), D2);
+        let vdb = Vect::new(D2, B2);
+
+        assert_eq!(round(va.direction(), prec),
+                   round(f64::to_radians(309.889497029295), prec),
+        );
+        assert_eq!(round(vb.direction(), prec),
+                   round(f64::to_radians(15.945395900922854), prec),
+        );
+        assert_eq!(round(vc.direction(), prec),
+                   round(f64::to_radians(161.565051177078), prec),
+        );
+        assert_eq!(round(vd.direction(), prec),
+                   round(f64::to_radians(243.43494882292202), prec),
+        );
+        assert_eq!(va.a.x, 0.);
+        assert_eq!(vc.a.x, vd.a.x);
+        assert_eq!(round(vdb.magnitude(), 4),
+                   round(6.4031242374328485, 4),
+        );
+        assert_eq!(round(vdb.direction(), prec),
+                   round(f64::to_radians(38.65980825409009), prec),
+        );
+        let deflangle = 157.2855876468;
+        let vo = vdb.extend_vect(3.64005494464026, f64::to_radians(180. + deflangle), true);
+        let vo_defl = vdb.deflect_vector(3.64005494464026, f64::to_radians(-deflangle), true);
+        // , "compare deflection and extending"
+        assert_eq!(vo.b, vo_defl.b);
+        // "vo by extending vdb by angle to origin"
+        assert_eq!(round(vo.b.x, prec), 0.0);
+        // "vo by extending vdb by angle to origin"
+        assert_eq!(round(vo.b.y, 4), round(0.0, prec));
+        let deflangleB = 141.34019174590992;
+        let inclangleD = 71.89623696549336;
+        // extend to c from end
+        let vextc = vdb.extend_vect(6.5, f64::to_radians(180. + deflangleB), true);
+        ////extend to c from begining
+        let vextCFromD = vdb.extend_vect(4.272001872658765, f64::to_radians(inclangleD), false);
+        // deflect to c from begin
+        let vdeflCFromD = vdb.deflect_vector(4.272001872658765, f64::to_radians(180. - inclangleD), false);
+        // "comparing extend and deflect from begin point D"
+        assert_eq!(vextCFromD.b, vdeflCFromD.b);
+        // "vextc from B and from D : extending vdb by angle to C"
+        assert_eq!(round(vextCFromD.b.x, prec), round(vextc.b.x, prec));
+        // "vextc from B and from D : extending vdb by angle to C"
+        assert_eq!(round(vextCFromD.b.y, prec), round(vextc.b.y, prec));
+        // "vextc by extending vdb by angle to C"
+        assert_eq!(round(vextc.b.x, prec), C[0]);
+        // "vextc by extending vdb by angle to C"
+        assert_eq!(round(vextc.b.y, 4), C[1]);
+        // "vextc with magnitudie extension from vdb C"
+        assert_eq!(round(vextc.v.0.x, prec), -vextc.magnitude());
+        // "vextc horizontal vector test:  extension from vdb C"
+        assert_eq!(round(vextc.v.0.y, prec), 0.)
+    }
 }
