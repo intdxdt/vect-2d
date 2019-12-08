@@ -450,4 +450,32 @@ mod tests {
         // "vextc horizontal vector test:  extension from vdb C"
         assert_eq!(round(vextc.v.0.y, prec), 0.)
     }
+
+    #[test]
+    fn test_vect_direction() {
+        let m = 25.0;
+        let dir = (165.0f64).to_radians();
+        let cpt = Point::component(m, dir);
+        let va = Vect::new(Point::new(0., 0.), cpt);
+        let va_b = pt![-24.148145657226706, 6.470476127563026];
+
+        //va endpoints equality: 0
+        assert_eq!(round(va.b.x, prec),
+                   round(va_b.x, prec),
+        );
+        //va endpoints equality: 1
+        assert_eq!(
+            round(va.b.y, prec),
+            round(va_b.y, prec),
+        );
+        assert!(va.magnitude().feq(25.));
+        assert_eq!(f64::to_radians(165.), va.direction());
+        assert_eq!(va.a.x, 0.0);
+        assert_eq!(va.a.y, 0.0);
+
+        //endpoint should be same as vector: 0
+        assert_eq!(round(va.b.x, prec), round(va.v.0.x, prec));
+        //endpoint should be same as vector: 1
+        assert_eq!(round(va.b.y, prec), round(va.v.0.y, prec));
+    }
 }
